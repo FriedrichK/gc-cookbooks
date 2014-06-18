@@ -1,0 +1,31 @@
+#!/bin/bash
+
+NAME=<%= node["gamecoach"]["application_name"] %>
+DJANGODIR=<%= node["gamecoach"]["project_folder"] %>
+SOCKFILE=<%= node["gamecoach"]["gunicorn"]["sock_file"] %>
+USER=<%= node["gamecoach"]["user"] %>
+GROUP=<%= node["gamecoach"]["group"] %>
+NUM_WORKERS=<%= node["gamecoach"]["gunicorn"]["number_of_workers"] %> 
+DJANGO_SETTINGS_MODULE=<%= node["gamecoach"]["django"]["settings"] %>
+DJANGO_WSGI_MODULE=<%= node["gamecoach"]["django"]["wsgi"] %>
+
+echo "Starting $NAME as `whoami`"
+
+# Activate the virtual environment
+cd $DJANGODIR
+source <%= node["gamecoach"]["virtualenv"]["activate_script"] %>
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+ 
+# Create the run directory if it doesn't exist
+RUNDIR=$(dirname $SOCKFILE)
+test -d $RUNDIR || mkdir -p $RUNDIR
+ 
+# Start your Django Unicorn
+# Programs meant to be run under supervisor should not daemonize themselves (do not use --daemon)
+exec <%= node["gamecoach"]["virtualenv"]["bin"] %>/gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+  --workers $NUM_WORKERS \
+  --user=$USER --group=$GROUP \
+  --log-level=debug \
+  --bind=unix:$SOCKFILE

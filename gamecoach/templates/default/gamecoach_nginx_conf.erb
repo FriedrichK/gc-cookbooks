@@ -1,0 +1,26 @@
+upstream gamecoach_server {
+  # fail_timeout=0 means we always retry an upstream even if it failed
+  # to return a good HTTP response (in case the Unicorn master nukes a
+  # single worker for timing out).
+
+  server unix:<%= node["gamecoach"]["gunicorn"]["sock_file"] %> fail_timeout=0;
+}
+
+server {
+    listen <%= node["gamecoach"]["nginx"]["port"] %>;
+    server_name <%= node["gamecoach"]["nginx"]["server_name"] %>;
+
+    location /static {
+        alias   <%= node["gamecoach"]["nginx"]["static_directory"] %>;
+    }
+
+    location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        if (!-f $request_filename) {
+            proxy_pass http://gamecoach_server;
+            break;
+        }
+    }
+}
