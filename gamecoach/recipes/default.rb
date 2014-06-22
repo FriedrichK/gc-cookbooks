@@ -40,9 +40,6 @@ git "#{node['gamecoach']['project_folder']}" do
   user "vagrant"
 end
 
-bash "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py syncdb --noinput" do
-end
-
 template "#{node['gamecoach']['project_folder']}/#{node['gamecoach']['application_name']}/.env" do
   source ".env.erb"
   user "vagrant"
@@ -106,6 +103,9 @@ python_pip "psycopg2" do
   version "2.5.3"
   user "vagrant"
   group "root"
+end
+
+execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py syncdb --noinput > #{node['gamecoach']['project_folder']}/syncdb.log" do
 end
 
 template "#{node['gamecoach']['project_folder']}/venv/bin/gunicorn_start" do

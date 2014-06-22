@@ -5,7 +5,7 @@ template "/etc/rc.d/init.d/supervisord" do
   mode 00755
 end
 
-bash "chkconfig --level 345 supervisord on" do
+execute "chkconfig --level 345 supervisord on" do
   user "root"
 end
 

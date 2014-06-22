@@ -23,6 +23,6 @@ default["gamecoach"]["nginx"]["static_directory"] = "#{node['gamecoach']['projec
 default["gamecoach"]["postgresql"]["host"] = "127.0.0.1"
 default["gamecoach"]["postgresql"]["port"] = "5432"
 default["gamecoach"]["postgresql"]["user"] = "postgres"
-default["gamecoach"]["postgresql"]["password"] = ""
+default["gamecoach"]["postgresql"]["password"] = "temporary"
 default["gamecoach"]["postgresql"]["database"] = "gamecoach"
 default['gamecoach']['postgresql']['path_to_pg_config'] = '/usr/pgsql-9.3/bin/pg_config'
