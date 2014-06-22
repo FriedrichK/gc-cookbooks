@@ -40,6 +40,9 @@ git "#{node['gamecoach']['project_folder']}" do
   user "vagrant"
 end
 
+bash "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py syncdb --noinput" do
+end
+
 template "#{node['gamecoach']['project_folder']}/#{node['gamecoach']['application_name']}/.env" do
   source ".env.erb"
   user "vagrant"
@@ -51,6 +54,7 @@ python_virtualenv "#{node['gamecoach']['project_folder']}/venv" do
   interpreter "python2.7"
   owner "vagrant"
   group "root"
+  options "--no-site-packages"
   action :create
 end
 
@@ -78,6 +82,20 @@ end
 python_pip "django-getenv" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "1.3.1"
+  user "vagrant"
+  group "root"
+end
+
+python_pip "factory_boy" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "2.3.1"
+  user "vagrant"
+  group "root"
+end
+
+python_pip "fake-factory" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "0.4.0"
   user "vagrant"
   group "root"
 end
