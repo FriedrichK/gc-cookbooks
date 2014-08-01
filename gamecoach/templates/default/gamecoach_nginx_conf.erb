@@ -8,10 +8,14 @@ upstream gamecoach_server {
 
 server {
     listen <%= node["gamecoach"]["nginx"]["port"] %>;
-    server_name <%= node["gamecoach"]["nginx"]["server_name"] %>;
+    #server_name <%= node["gamecoach"]["nginx"]["server_name"] %>;
+
+    location /static/django_facebook {
+      alias <%= node["gamecoach"]["nginx"]["static_directory_facebook"] %>;
+    }
 
     location /static {
-        alias   <%= node["gamecoach"]["nginx"]["static_directory"] %>;
+      alias <%= node["gamecoach"]["nginx"]["static_directory"] %>;
     }
 
     location / {
@@ -22,5 +26,10 @@ server {
             proxy_pass http://gamecoach_server;
             break;
         }
+    }
+
+    location /upload/ {
+        internal;
+        root <%= node["gamecoach"]["nginx"]["mediaroot"] %>;
     }
 }

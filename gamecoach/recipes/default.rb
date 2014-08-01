@@ -1,3 +1,8 @@
+include_recipe "gc-base"
+include_recipe "gc-python"
+include_recipe "gc-nginx"
+include_recipe "gc-supervisor"
+include_recipe "gc-postgresql::server"
 include_recipe "database::postgresql"
 
 ENV['PGUSER'] = node['gamecoach']['postgresql']['user']
@@ -11,9 +16,9 @@ export PGUSER=#{node['gamecoach']['postgresql']['user']}
 end
 
 cookbook_file ".pgpass" do
-  path "/home/vagrant/.pgpass"
-  owner "vagrant"
-  group "vagrant"
+  path "#{node['gamecoach']['home_dir']}/.pgpass"
+  owner node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   mode 00600
   action :create
 end
@@ -27,9 +32,16 @@ postgresql_database "#{node['gamecoach']['postgresql']['database']}" do
   action :create
 end
 
+directory "#{node['gamecoach']['filestystem']['mediaroot']}" do
+  owner node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+  action :create
+  recursive true
+end
+
 directory "#{node['gamecoach']['project_folder']}" do
-  owner "vagrant"
-  group "root"
+  owner node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   action :create
 end
 
@@ -37,92 +49,156 @@ git "#{node['gamecoach']['project_folder']}" do
   repository "#{node['gamecoach']['repository']}"
   reference "#{node['gamecoach']['branch']}"
   action "sync"
-  user "vagrant"
+  user node["gamecoach"]["user"]
 end
 
 template "#{node['gamecoach']['project_folder']}/#{node['gamecoach']['application_name']}/.env" do
   source ".env.erb"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   mode 00771
 end
 
+#python_pip 'setuptools' do
+#  action :upgrade
+#  version node['python']['setuptools_version']
+#end
+
 python_virtualenv "#{node['gamecoach']['project_folder']}/venv" do
   interpreter "python2.7"
-  owner "vagrant"
-  group "root"
+  owner node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   options "--no-site-packages"
   action :create
+end
+
+python_pip "Pillow" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "2.4.0"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 python_pip "django" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "1.6.5"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 python_pip "gunicorn" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "19.0.0"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "django-nose" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "1.2"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 python_pip "django-dotenv" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "1.2"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 python_pip "django-getenv" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "1.3.1"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
-python_pip "factory_boy" do
+python_pip "django-postman" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
-  version "2.3.1"
-  user "vagrant"
-  group "root"
+  version "3.1.0"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
-python_pip "fake-factory" do
+python_pip "django-facebook" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
-  version "0.4.0"
-  user "vagrant"
-  group "root"
+  version "6.0.0"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 ENV['PATH'] = ENV['PATH'] + ":" + node['gamecoach']['postgresql']['path_to_pg_config']
 python_pip "psycopg2" do
   virtualenv "#{node['gamecoach']['project_folder']}/venv"
   version "2.5.3"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "south" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "1.0"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "mock" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "1.0.1"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "factory_boy" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "2.3.1"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "fake-factory" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "0.4.0"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "Faker" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "0.0.4"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+end
+
+python_pip "selenium" do
+  virtualenv "#{node['gamecoach']['project_folder']}/venv"
+  version "2.42.1"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
 end
 
 execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py syncdb --noinput > #{node['gamecoach']['project_folder']}/syncdb.log" do
 end
 
+execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py migrate profiles > #{node['gamecoach']['project_folder']}/migrate.log" do
+end
+
 template "#{node['gamecoach']['project_folder']}/venv/bin/gunicorn_start" do
   source "gunicorn_start.erb"
-  user "vagrant"
-  group "root"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   mode 00771
 end
 
-template "#{node['nginx']['dir']}/conf.d/gamecoach.conf" do
+template "#{node['nginx']['dir']}/sites-enabled/gamecoach.conf" do
   source "gamecoach_nginx_conf.erb"
   notifies :restart, "service[nginx]", :immediately
 end
 
 directory "#{node['gamecoach']['project_folder']}/logs" do
-  owner "vagrant"
-  group "root"
+  owner node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
   action :create
 end
 
@@ -132,7 +208,7 @@ end
 
 supervisor_service "gamecoach" do
   command "#{node['gamecoach']['project_folder']}/venv/bin/gunicorn_start"
-  user "root"
+  user node["gamecoach"]["group"]
   stdout_logfile "#{node['gamecoach']['project_folder']}/logs/gunicorn_supervisor.log"
   redirect_stderr true
 end
