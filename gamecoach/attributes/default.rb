@@ -1,4 +1,5 @@
 default["gamecoach"]["distribution"] = "release"
+default["gamecoach"]["debug"] = "True"
 default["gamecoach"]["application_name"] = "gamecoach"
 
 default["gamecoach"]["user"] = "root"
