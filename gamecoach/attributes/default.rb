@@ -41,3 +41,5 @@ default['gamecoach']['facebook']['id'] = '240307459426941'
 default['gamecoach']['facebook']['secret'] = 'b43a86dfa3d76dfac28a1d4527246099'
 
 default["gamecoach"]["filestystem"]["mediaroot"] = '/var/gamecoach/upload'
+
+default["gamecoach"]["calq"]["write_key"] = '07684e1cc7202baaffcf3f07a647af9a'
