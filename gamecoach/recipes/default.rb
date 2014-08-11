@@ -205,6 +205,13 @@ directory "#{node['gamecoach']['project_folder']}/logs" do
   action :create
 end
 
+template "/etc/supervisor.d/gamecoach.conf" do
+  source "gamecoach_supervisor_conf.erb"
+  user node["gamecoach"]["user"]
+  group node["gamecoach"]["group"]
+  mode 00644
+end
+
 service 'supervisord' do
   action :restart
 end
