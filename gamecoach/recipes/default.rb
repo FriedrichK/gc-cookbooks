@@ -181,6 +181,9 @@ end
 execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py syncdb --noinput > #{node['gamecoach']['project_folder']}/syncdb.log" do
 end
 
+execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py migrate django_facebook > #{node['gamecoach']['project_folder']}/migrate.log" do
+end
+
 execute "#{node['gamecoach']['project_folder']}/venv/bin/python #{node['gamecoach']['project_folder']}/manage.py migrate profiles > #{node['gamecoach']['project_folder']}/migrate.log" do
 end
 
